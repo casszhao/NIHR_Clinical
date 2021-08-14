@@ -42,3 +42,7 @@ for prompt in text_list:
 
     prediction_list.append(logits)
 
+testing_data['prediction'] = prediction_list
+
+testing_data.to_csv('./data/testing_results.csv')
+
