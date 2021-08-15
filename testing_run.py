@@ -5,13 +5,13 @@ import pandas as pd
 import nltk
 
 
-choice_list = pd.read_csv('./data/sorted_cats.csv', header=None)[0].to_list()
+choice_list = pd.read_csv('./data/sorted_cats.csv', header=None)[0].sample(6).to_list()
 print(choice_list)
 cate_dic = {k: v for k, v in enumerate(choice_list)}
 print(cate_dic)
 
 print(len(choice_list))
-testing_data = pd.read_csv('./data/new_cat_list_3match_results.csv', usecols=[2,3,6])
+testing_data = pd.read_csv('./data/new_cat_list_3match_results.csv', usecols=[2,3,6]).sample(7)
 print(testing_data)
 print(len(testing_data))
 
