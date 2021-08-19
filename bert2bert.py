@@ -1,7 +1,7 @@
 import torch
 import pandas as pd
 import numpy as np
-
+from transformers import BertGenerationEncoder
 '''
 sorted_cat = pd.read_csv('./data/sorted_cats.csv', header=None)[0].to_list()
 from mediawiki import MediaWiki
@@ -21,28 +21,30 @@ df = pd.DataFrame(list(zip(sorted_cat, article_list)),
 df.to_csv('./data/cat_article.csv')
 
 '''
-
+#model_name = "emilyalsentzer/Bio_ClinicalBERT"
 
 df = pd.read_csv('./data/cat_article.csv')
-model_name = "emilyalsentzer/Bio_ClinicalBERT"
+
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 
 
-doc = df['article'].to_list()
+doc = df['article'].values.astype(str)
 vectorizer = TfidfVectorizer()
+print(len(doc))
 X = vectorizer.fit_transform(doc)
 indices = np.argsort(vectorizer.idf_)[::-1]
 features = vectorizer.get_feature_names()
 top_n = 30
 top_features = [features[i] for i in indices[:top_n]]
+print('----top_features---')
 print(top_features)
 
 
 
 tfidf_vectorizer=TfidfVectorizer(use_idf=True, lowercase=True, stop_words='english')
-tfidf_vectorizer_vectors=tfidf_vectorizer.fit_transform(df['article'].to_list())
+tfidf_vectorizer_vectors=tfidf_vectorizer.fit_transform(doc)
 
 tfidf = tfidf_vectorizer_vectors.todense()
 # TFIDF of words not in the doc will be 0, so replace them with nan
@@ -55,15 +57,17 @@ means = dict(zip(tfidf_vectorizer.get_feature_names(), means.tolist()[0]))
 
 
 sorted_cat_lowervob = list((map(lambda x: x.lower(), df['label'].to_list())))
-sorted_cat_lowervob
 
 
 df['label']=sorted_cat_lowervob
 
+df = df.dropna()
 
 
 top_30tfidf_list = []
 for row in df['article'].to_list():
+  # print('-------------------------row')
+  # print(row)
   tokenized_list = row.split()
   each_tfidf = []
   for word in tokenized_list:
