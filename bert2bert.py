@@ -1,7 +1,7 @@
 import torch
 import pandas as pd
 import numpy as np
-from transformers import BertGenerationEncoder
+from transformers import BertGenerationEncoder, AdamW, get_linear_schedule_with_warmup
 '''
 sorted_cat = pd.read_csv('./data/sorted_cats.csv', header=None)[0].to_list()
 from mediawiki import MediaWiki
@@ -123,7 +123,7 @@ print(output)
 #########################    TRAIN #####################
 raw_datasets = Dataset.from_pandas(df)
 
-device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 from sklearn.model_selection import train_test_split
 train_texts, val_texts, train_labels, val_labels = train_test_split(df['sent'], df['label'], test_size=.2)
 test_texts, val_texts, test_labels, val_labels = train_test_split(val_texts, val_labels, test_size=.5)
@@ -161,7 +161,6 @@ validation_sampler = SequentialSampler(validation_data)
 validation_dataloader = DataLoader(validation_data, sampler=validation_sampler, batch_size=batch_size)
 
 
-from transformers import get_linear_schedule_with_warmup
 from tqdm import  tqdm_notebook
 
 lr = 2e-5
@@ -177,9 +176,10 @@ optimizer = AdamW(bert2bert.parameters(), lr=lr, correct_bias=False)  # To repro
 scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps = -1) #num_total_steps
 
 epochs = 2
+bert2bert.to(device)
 
 # trange is a tqdm wrapper around the normal python range
-for epoch in tqdm_notebook(range(epochs)):
+for epoch in range(epochs):
 
   # Training
   # Set our model to training mode (as opposed to evaluation mode)
@@ -207,9 +207,9 @@ for epoch in tqdm_notebook(range(epochs)):
     optimizer.step()
     scheduler.step()
     optimizer.zero_grad()
-    if (i) % 50 == 0:
-      print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
-            .format(epoch + 1, epochs, i + 1, total_step, loss.item()))
+    # if (i) % 50 == 0:
+    #   print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}'
+    #         .format(epoch + 1, epochs, i + 1, total_step, loss.item()))
 
 
 
